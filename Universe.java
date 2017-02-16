@@ -3,6 +3,9 @@ package com.ladislav;
 /**
  * Created by student on 16.02.2017.
  */
+
+// TODO (1) Implement Universe with bits instead of boolean array
+
 public class Universe {
 
     private final int power;
@@ -20,7 +23,7 @@ public class Universe {
         elements = new boolean[power];
     }
 
-    // Universe
+    // TODO (2) Implement method union() that doesn't change this object
     public boolean union(Universe other){
 
         if (this.getPower() == other.getPower()) {                          // if their powers are equal
@@ -34,7 +37,7 @@ public class Universe {
 
         return false;
     }
-
+    // TODO (3) Implement method intersection() that doesn't change this object
     public boolean intersection(Universe other) {
 
         if (this.getPower() == other.getPower()) {
@@ -47,6 +50,8 @@ public class Universe {
 
         return false;
     }
+    // TODO (4) Implement methods  complement()
+
 
     public boolean addElement(int element) {
 
