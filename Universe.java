@@ -1,7 +1,9 @@
 package com.ladislav;
 
 /**
- * Created by student on 16.02.2017.
+ * Created on 16.02.2017.
+ * This class implements bitset functionality.
+ * @author Ladislav
  */
 
 // TODO (1) Implement Universe with bits instead of boolean array
@@ -74,7 +76,7 @@ public class Universe {
     }
 
     public boolean elementExists(int element) {
-        return element < power ? elements[element]:false;
+        return element < power && elements[element];
     }
 
     public int getPower() {
