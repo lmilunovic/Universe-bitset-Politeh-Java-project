@@ -21,13 +21,12 @@ public class Universe {
         }
     }
 
-
     public boolean elementExists(int element) {
 
         if (element >= 0 && element <= numberOfBits) {
-            // 12
-            int bitSetPos = element / BYTE_SIZE; // 12 / 8 = 1
-            byte bitSetValue = bitSet[bitSetPos]; // vrijednost 80
+
+            int bitSetPos = element / BYTE_SIZE;
+            byte bitSetValue = bitSet[bitSetPos];
 
             return ((bitSetValue >> (element - bitSetPos*BYTE_SIZE) & 1) == 1);
 
@@ -109,6 +108,7 @@ public class Universe {
     // Quick testing of Complement, Union and Intersection
     // TODO test it with JUnit in Testing class
     public static void main(String[] args) {
+
         Universe univ1 = new Universe(50);
         Universe univ2 = new Universe (50);
 
@@ -147,6 +147,7 @@ public class Universe {
         printUniverse(univ2.union(univ1));
     }
 
+    // TODO Implement toString()
     public static void printUniverse(Universe universe) {
 
         for(int i = 0; i < universe.size(); i++) {
@@ -157,6 +158,5 @@ public class Universe {
             }
         }
         System.out.println();
-
     }
 }

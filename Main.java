@@ -1,5 +1,7 @@
 package com.ladislav;
 
+import static com.ladislav.Universe.printUniverse;
+
 public class Main {
 
     public static void main(String[] args) {
@@ -97,19 +99,5 @@ public class Main {
             printUniverse(otherUniv);
             System.out.print("Complement: ");
             printUniverse(union);
-
-    }
-
-    public static void printUniverse(Universe universe) {
-
-        for(int i = 0; i < universe.size(); i++) {
-            if (universe.elementExists(i)) {
-                System.out.print(i + " ");
-            } else {
-                System.out.print("- ");
-            }
-        }
-        System.out.println();
-
     }
 }
