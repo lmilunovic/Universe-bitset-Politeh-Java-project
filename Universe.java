@@ -3,29 +3,48 @@ package com.ladislav;
 import java.util.Objects;
 
 /**
- * Created by Ladislav on 2/22/2017.
+ *
+ * Implements set on fixed universe. Power of the universe is set in constructor.
+ * Element of the set is positive integer.
+ * Implements oprations: intersection, union, complement, add/remove element or array of elements and existance of element
+ *
+ * @author Ladislav
+ * @version 2.1
+ * @since 12/23/2017
  */
+
 public class Universe {
 
     private static final int BYTE_SIZE = 8;
 
     private final byte[] bitSet;
-    private final int numberOfBits;
+    private final int power;
 
-    Universe(int numberOfBits) {
-        assert numberOfBits >= 0;
+    /**
+     * *Universe constructor
+     * @param power integer, sets power (possible number of elements)
+     * @throws AssertionError if power is less than 0
+     */
+    Universe(int power) {
+        assert power > 0;
 
-        this.numberOfBits = numberOfBits;
-        if (numberOfBits % BYTE_SIZE == 0) {
-            bitSet = new byte[((numberOfBits / BYTE_SIZE))];
+        this.power = power;
+        if (power % BYTE_SIZE == 0) {
+            bitSet = new byte[((power / BYTE_SIZE))];
         } else {
-            bitSet = new byte[numberOfBits / BYTE_SIZE + 1];
+            bitSet = new byte[power / BYTE_SIZE + 1];
         }
     }
 
+    /**
+     * *Checks if element exists in Universe or not
+     * @param element, integer
+     * @return true if exists, false if doesn't
+     * @throws ArrayIndexOutOfBoundsException if element size is not in bounds of Universe power
+     */
     public boolean elementExists(int element) {
 
-        if (element >= 0 && element <= numberOfBits) {
+        if (element >= 0 && element <= power) {
 
             int bitSetPos = element / BYTE_SIZE;
             byte bitSetValue = bitSet[bitSetPos];
@@ -36,7 +55,12 @@ public class Universe {
             throw new IndexOutOfBoundsException();
         }
     }
-
+    /**
+     * Adds certain element to set.
+     * @param element integer to add  to set
+     * @return boolean, true if added, false if not
+     * @throws IndexOutOfBoundsException (elementExsists()) when nubmer is greather than Unvierse power
+     */
     public boolean setElement(int element) {
 
         if (!elementExists(element)) {
@@ -50,6 +74,37 @@ public class Universe {
         return false;
     }
 
+    /**
+     * Adds array of elements to set.
+     * @param element array of elements to add to set
+     * @return integer, number of addeds elements, -1 if array length is larger than Universe power
+     * @throws IndexOutOfBoundsException (elementExsists()) when nubmer is greather than Unvierse power
+     */
+
+    public int setElement(int[] element) {
+
+        int counter = 0;
+
+        if (element.length <= this.power()) {
+            for (int i = 0; i < element.length; i++) {
+                int elementToSet = element[i];
+                if (elementToSet < this.power() && !this.elementExists(elementToSet)) {
+                    setElement(elementToSet);
+                    counter++;
+                }
+            }
+            return counter;
+        }
+        return -1;
+    }
+
+    /**
+     * Removes certain element from set.
+     * @param element integer to remove from set
+     * @return boolean, true if removed, false if not
+     * @throws IndexOutOfBoundsException (elementExsists()) when nubmer is greather than Unvierse power
+     */
+
     public boolean unsetElement(int element) {
         if (elementExists(element)) {
             int bitSetPos = element / BYTE_SIZE;
@@ -62,10 +117,37 @@ public class Universe {
         return false;
     }
 
+    /**
+     * Removes array of elements from set.
+     * @param element array of elements to remove
+     * @return number of elements removed, -1 if array length is greater than Universe power
+     */
+
+    public int unsetElement(int[] element) {
+
+        int counter = 0;
+        if (element.length <= this.power()) {
+            for (int i = 0; i < element.length; i++) {
+                int elementToUnset = element[i];
+                if (elementToUnset < this.power() && this.elementExists(elementToUnset)) {
+                    unsetElement(elementToUnset);
+                    counter++;
+                }
+            }
+            return counter;
+        }
+        return -1;
+    }
+
+    /**
+     * *Implements union set arithmetic
+     * @param other accepts Universe object that has to have same power as one uniting with
+     * @return Returns union of to Universes or null if their power differs
+     */
     public Universe union(Universe other){
-        if (this.size() == other.size()) {
-            Universe newUniverse = new Universe(this.size());
-            for(int i = 0; i < this.size(); i++) {
+        if (this.power() == other.power()) {
+            Universe newUniverse = new Universe(this.power());
+            for(int i = 0; i < this.power(); i++) {
                 if (this.elementExists(i) || other.elementExists(i)) {
                     newUniverse.setElement(i);
                 }
@@ -75,10 +157,15 @@ public class Universe {
         return null;
     }
 
+    /**
+     * *Implements intersection set arithmetic
+     * @param other accepts Universe object that has to have same power as one intersectingwith
+     * @return Returns intersection of to Universes or null if their power differs
+     */
     public Universe intersection(Universe other) {
-        if (this.size() == other.size()) {
-            Universe newUniverse = new Universe(this.size());
-            for(int i = 0; i < this.size(); i++) {
+        if (this.power() == other.power()) {
+            Universe newUniverse = new Universe(this.power());
+            for(int i = 0; i < this.power(); i++) {
                 if (this.elementExists(i) && other.elementExists(i)) {
                     newUniverse.setElement(i);
                 }
@@ -88,11 +175,17 @@ public class Universe {
         return null;
     }
 
+
+    /**
+     * *Implements complement set arithmetic
+     * @param other accepts Universe object that has to have same power as one intersectingwith
+     * @return Returns intersection of to Universes or null if their power differs
+     */
     public Universe complement(Universe other) {
 
-        if (this.size() == other.size()) {
-            Universe newUniverse = new Universe(this.size());
-            for(int i = 0; i < this.size(); i++) {
+        if (this.power() == other.power()) {
+            Universe newUniverse = new Universe(this.power());
+            for(int i = 0; i < this.power(); i++) {
                 if (this.elementExists(i) && !other.elementExists(i)) {
                     newUniverse.setElement(i);
                 }
@@ -102,8 +195,11 @@ public class Universe {
         return null;
     }
 
-    public int size() {
-        return numberOfBits;
+    /**
+     * @return integer, number of possible elements in the Universe
+     */
+    public int power() {
+        return power;
     }
 
     @Override
@@ -114,10 +210,10 @@ public class Universe {
         }
         if (o instanceof Universe) {
             Universe other = (Universe)o;
-            if (this.size() != other.size()) {
+            if (this.power() != other.power()) {
                 return false;
             }
-            for(int i = 0; i < this.size(); i++) {
+            for(int i = 0; i < this.power(); i++) {
                 if (this.elementExists(i) && other.elementExists(i) ||
                         !this.elementExists(i) && !other.elementExists(i)) {
                     continue;
@@ -132,7 +228,7 @@ public class Universe {
 
     @Override
     public int hashCode() {
-        return Objects.hash(numberOfBits, bitSet, BYTE_SIZE);
+        return Objects.hash(power, bitSet, BYTE_SIZE);
     }
 
     @Override
@@ -140,9 +236,9 @@ public class Universe {
         StringBuilder sb = new StringBuilder();
 
         sb.append("[");
-        for(int i = 0; i < this.size(); i++) {
+        for(int i = 0; i < this.power(); i++) {
             if (this.elementExists(i)) {
-                if (i == this.size() - 1) {
+                if (i == this.power() - 1) {
                     sb.append(i + "");
                 } else {
                     sb.append(i + ", ");
