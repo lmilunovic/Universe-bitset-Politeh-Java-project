@@ -137,6 +137,7 @@ public class Universe {
      * @param other accepts Universe object that has to have same power as one uniting with
      * @return Returns union of to Universes or null if their power differs
      */
+    // TODO (1) change method so that it can return universe of different power
     public Universe union(Universe other){
         if (this.power() == other.power()) {
             Universe newUniverse = new Universe(this.power());
@@ -149,12 +150,14 @@ public class Universe {
         }
         return null;
     }
-
+    // TODO (2) make union that changes this Universe (if same size)
     /**
      * *Implements intersection set arithmetic
      * @param other accepts Universe object that has to have same power as one intersectingwith
      * @return Returns intersection of to Universes or null if their power differs
      */
+
+    // TODO (3) change method so that it can return universe of different power
     public Universe intersection(Universe other) {
         if (this.power() == other.power()) {
             Universe newUniverse = new Universe(this.power());
@@ -167,12 +170,15 @@ public class Universe {
         }
         return null;
     }
+    // TODO (4) make union that changes this Universe (if same size)
 
     /**
      * *Implements complement set arithmetic
      * @param other accepts Universe object that has to have same power as one intersectingwith
      * @return Returns intersection of to Universes or null if their power differs
      */
+
+    // TODO (5) change method so that makes complement of set and Universe, no param
     public Universe complement(Universe other) {
 
         if (this.power() == other.power()) {
@@ -187,6 +193,7 @@ public class Universe {
         return null;
     }
 
+    // TODO (6) Make method that returns number of set elements
     /**
      * @return integer, number of possible elements in the Universe
      */
