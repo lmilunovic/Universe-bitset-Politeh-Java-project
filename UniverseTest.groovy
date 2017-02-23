@@ -5,6 +5,7 @@ package com.ladislav
 class UniverseTest extends GroovyTestCase {
 
     void testElementExists() {
+        
         final int n = 15;
         Universe universe = new Universe(n);
 

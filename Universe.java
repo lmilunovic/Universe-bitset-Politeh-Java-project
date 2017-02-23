@@ -3,7 +3,6 @@ package com.ladislav;
 import java.util.Objects;
 
 /**
- *
  * Implements set on fixed universe. Power of the universe is set in constructor.
  * Element of the set is positive integer.
  * Implements oprations: intersection, union, complement, add/remove element or array of elements and existance of element
@@ -20,11 +19,6 @@ public class Universe {
     private final byte[] bitSet;
     private final int power;
 
-    /**
-     * *Universe constructor
-     * @param power integer, sets power (possible number of elements)
-     * @throws AssertionError if power is less than 0
-     */
     Universe(int power) {
         assert power > 0;
 
@@ -42,6 +36,7 @@ public class Universe {
      * @return true if exists, false if doesn't
      * @throws ArrayIndexOutOfBoundsException if element size is not in bounds of Universe power
      */
+
     public boolean elementExists(int element) {
 
         if (element >= 0 && element <= power) {
@@ -172,7 +167,6 @@ public class Universe {
         }
         return null;
     }
-
 
     /**
      * *Implements complement set arithmetic
