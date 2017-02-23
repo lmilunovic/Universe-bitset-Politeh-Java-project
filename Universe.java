@@ -76,18 +76,17 @@ public class Universe {
 
     /**
      * Adds array of elements to set.
-     * @param element array of elements to add to set
+     * @param elements array of elements to add to set
      * @return integer, number of addeds elements, -1 if array length is larger than Universe power
      * @throws IndexOutOfBoundsException (elementExsists()) when nubmer is greather than Unvierse power
      */
 
-    public int setElement(int[] element) {
+    public int setElement(int[] elements) {
 
         int counter = 0;
 
-        if (element.length <= this.power()) {
-            for (int i = 0; i < element.length; i++) {
-                int elementToSet = element[i];
+        if (elements.length <= this.power()) {
+            for (int elementToSet : elements) {
                 if (elementToSet < this.power() && !this.elementExists(elementToSet)) {
                     setElement(elementToSet);
                     counter++;
@@ -119,16 +118,15 @@ public class Universe {
 
     /**
      * Removes array of elements from set.
-     * @param element array of elements to remove
+     * @param elements array of elements to remove
      * @return number of elements removed, -1 if array length is greater than Universe power
      */
 
-    public int unsetElement(int[] element) {
+    public int unsetElement(int[] elements) {
 
         int counter = 0;
-        if (element.length <= this.power()) {
-            for (int i = 0; i < element.length; i++) {
-                int elementToUnset = element[i];
+        if (elements.length <= this.power()) {
+            for (int elementToUnset : elements) {
                 if (elementToUnset < this.power() && this.elementExists(elementToUnset)) {
                     unsetElement(elementToUnset);
                     counter++;
