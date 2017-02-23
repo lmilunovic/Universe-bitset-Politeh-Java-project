@@ -239,9 +239,9 @@ public class Universe {
         for(int i = 0; i < this.power(); i++) {
             if (this.elementExists(i)) {
                 if (i == this.power() - 1) {
-                    sb.append(i + "");
+                    sb.append(i).append("");
                 } else {
-                    sb.append(i + ", ");
+                    sb.append(i).append(", ");
                 }
             }
         }
