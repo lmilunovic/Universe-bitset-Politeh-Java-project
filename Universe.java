@@ -1,5 +1,7 @@
 package com.ladislav;
 
+import java.util.Objects;
+
 /**
  * Created by Ladislav on 2/22/2017.
  */
@@ -104,59 +106,49 @@ public class Universe {
         return numberOfBits;
     }
 
+    @Override
+    public boolean equals(Object o) {
 
-    // Quick testing of Complement, Union and Intersection
-    // TODO test it with JUnit in Testing class
-    public static void main(String[] args) {
-
-        Universe univ1 = new Universe(50);
-        Universe univ2 = new Universe (50);
-
-        for(int i = 0; i < univ1.size(); i++) {
-            if (i > 25) {
-                univ1.setElement(i);
-                univ2.setElement(i);
-            } else {
-                univ2.setElement(i);
-            }
+        if (this == o) {
+            return true;
         }
-        System.out.println("Universe 1");
-        printUniverse(univ1);
-        System.out.println("Universe 2");
-        printUniverse(univ2);
-        System.out.println("Universe complement");
-        printUniverse(univ2.complement(univ1));
-        System.out.println("Universe intersection");
-        printUniverse(univ2.intersection(univ1));
-
-        univ1 = new Universe(50);
-        univ2 = new Universe (50);
-
-        for(int i = 0; i < univ1.size(); i++) {
-            if (i % 2 == 0) {
-                univ1.setElement(i);
-            } else {
-                univ2.setElement(i);
+        if (o instanceof Universe) {
+            Universe other = (Universe)o;
+            if (this.size() != other.size()) {
+                return false;
             }
+            for(int i = 0; i < this.size(); i++) {
+                if (this.elementExists(i) && other.elementExists(i) ||
+                        !this.elementExists(i) && !other.elementExists(i)) {
+                    continue;
+                } else {
+                    return false;
+                }
+            }
+            return true;
         }
-        System.out.println("Universe 1");
-        printUniverse(univ1);
-        System.out.println("Universe 2");
-        printUniverse(univ2);
-        System.out.println("Universe union");
-        printUniverse(univ2.union(univ1));
+        return false;
     }
 
-    // TODO Implement toString()
-    public static void printUniverse(Universe universe) {
+    @Override
+    public int hashCode() {
+        return Objects.hash(numberOfBits, bitSet, BYTE_SIZE);
+    }
 
-        for(int i = 0; i < universe.size(); i++) {
-            if (universe.elementExists(i)) {
-                System.out.print(i + " ");
-            } else {
-                System.out.print("- ");
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("[");
+        for(int i = 0; i < this.size(); i++) {
+            if (this.elementExists(i)) {
+                if (i == this.size() - 1) {
+                    sb.append(i + "");
+                } else {
+                    sb.append(i + ", ");
+                }
             }
         }
-        System.out.println();
+        return sb.append("]").toString();
     }
 }
