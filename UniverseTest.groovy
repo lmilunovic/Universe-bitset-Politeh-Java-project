@@ -38,7 +38,6 @@ class UniverseTest extends GroovyTestCase {
         assertTrue(universe.setElement(14));
         assertEquals(4, universe.setElement(a));
 
-        println universe.toString()
     }
 
     void testUnsetElement() {
@@ -57,7 +56,7 @@ class UniverseTest extends GroovyTestCase {
         assertEquals(4, universe.unsetElement(a));
     }
 
-    // Groovy overloads ==, it callse equals() method
+    // Groovy overloads ==, it calls equals() method
     void testEquals() {
         final int n = 8;
         Universe univ1 = new Universe(n); // univ = 92982372
@@ -81,6 +80,38 @@ class UniverseTest extends GroovyTestCase {
         assertTrue univ2 == univ1
     }
 
+    void testUnite(){
+
+        final int n = 50;
+        Universe univ1 = new Universe(n);
+        Universe univ2 = new Universe (n);
+
+        for(int i = 0; i < univ1.power(); i++) {
+            if (i > 25) {
+                univ1.setElement(i);
+            } else {
+                univ2.setElement(i);
+            }
+        }
+
+        Universe union = univ1.union(univ2);
+
+        for (int i = 0; i < univ1.power(); i++) {
+            if (i > 25) {
+                assertTrue univ1.elementExists(i)
+                assertFalse univ2.elementExists(i)
+            } else {
+                assertFalse univ1.elementExists(i)
+                assertTrue univ2.elementExists(i)
+            }
+            assertTrue union.elementExists(i)
+        }
+
+        univ1.unite(univ2)
+        assertTrue union == univ1
+
+
+    }
     void testUnion() {
         final int n = 50;
         Universe univ1 = new Universe(n);
@@ -107,8 +138,8 @@ class UniverseTest extends GroovyTestCase {
             assertTrue union.elementExists(i)
         }
 
-        union = univ1.union(univ1);
 
+        union = univ1.union(univ1);
         for (int i = 0; i < n; i++) {
             if (i > 25) {
                 assertTrue univ1.elementExists(i)
@@ -118,14 +149,21 @@ class UniverseTest extends GroovyTestCase {
                 assertFalse union.elementExists(i)
             }
         }
+
+
+
     }
 
+    void testIntersect() {
+
+    }
     void testIntersection() {
 
-        final int n = 50;
+        final int a = 40;
+        final int b = 50;
 
-        Universe univ1 = new Universe(n);
-        Universe univ2 = new Universe (n);
+        Universe univ1 = new Universe(a);
+        Universe univ2 = new Universe (b);
 
         for(int i = 0; i < univ1.power(); i++) {
             if (i > 25) {
@@ -137,9 +175,11 @@ class UniverseTest extends GroovyTestCase {
 
         assertTrue intersection == univ1
         assertFalse intersection == univ2
+        univ1.intersect(univ2)
+        assertTrue intersection == univ1
     }
 
-    void testComplement() {
+    void testDifference() {
         final int n = 50;
 
         Universe univ1 = new Universe(n);
@@ -152,14 +192,73 @@ class UniverseTest extends GroovyTestCase {
             univ2.setElement(i);
         }
 
-        Universe complement = univ2.complement(univ1);
+        Universe difference = univ2.difference(univ1);
 
-        assertTrue univ1.union(complement) == univ2
+        assertTrue univ1.union(difference) == univ2
     }
 
+    void testComplement() {
+        Universe u = new Universe(20)
+
+        for (int i = 0; i < u.power(); i++) {
+            if (i % 2 == 0) {
+                u.setElement(i)
+            }
+        }
+
+        u.complement()
+
+        for (int i = 0; i < u.power(); i++) {
+            if (i % 2 != 0) {
+                assertTrue u.elementExists(i)
+            } else {
+                assertFalse u.elementExists(i)
+            }
+        }
+
+    }
     void testPower() {
         int n = 15;
         Universe universe = new Universe(n);
         assertEquals n, universe.power();
+    }
+
+    void testSize(){
+        final int n = 15
+        int[] a = [2, 3, 4, 13]
+        int[] b = [12, 14]
+        Universe universe = new Universe(n)
+
+        universe.setElement(0)
+        universe.setElement(5)
+        universe.setElement(12)
+        universe.setElement(14)
+        universe.setElement(a)
+        universe.unsetElement(5)
+        universe.unsetElement(b)
+        assertEquals(5, universe.size())
+    }
+
+    void testIterator() {
+
+        Universe u = new Universe(20);
+        int counter = 0;
+
+        for (int i = 0; i < u.power(); i++) {
+            if(i % 2 == 0)
+                u.setElement(i);
+        }
+
+        Iterator it = u.iterator();
+        while (it.hasNext()) {
+            assertEquals(counter , it.next() )
+            counter += 2
+        }
+
+        counter = 0;
+        for (int i : u) {
+            assertEquals counter, i
+            counter +=2
+        }
     }
 }
