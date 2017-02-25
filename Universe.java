@@ -7,16 +7,15 @@ import java.util.Objects;
 /**
  * Implements set on fixed universe. Power of the universe is set in constructor.
  * Element of the set is positive integer.
- * Implements operations: intersection, union, difference, complement, add/remove element or
+ * Implements operations: intersection, intersect, union, unite, difference, complement, add/remove element or
  * array of elements and existence of element.
  *
  * @author Ladislav
- * @version 2.2
- * @since 12/24/2017
+ * @version 2.3
+ * @since 12/25/2017
  */
 
 public class Universe implements Iterable<Integer>{
-
 
     private static final int BYTE_SIZE = 8;
 
@@ -24,8 +23,11 @@ public class Universe implements Iterable<Integer>{
     private final int power;
     private int setSize = 0;
 
-    Universe(int power) {
-        assert power > 0;
+    public Universe(int power) {
+
+        if (power <= 0) {
+            throw new IllegalArgumentException("Universe power must be greater than 0! Power passed: " + power);
+        }
 
         this.power = power;
         if (power % BYTE_SIZE == 0) {
@@ -44,16 +46,14 @@ public class Universe implements Iterable<Integer>{
 
     public boolean elementExists(int element) {
 
-        if (element >= 0 && element <= power) {
-
-            int bitSetPos = element / BYTE_SIZE;
-            byte bitSetValue = bitSet[bitSetPos];
-
-            return ((bitSetValue >> (element - bitSetPos*BYTE_SIZE) & 1) == 1);
-
-        } else {
+        if (element < 0 && element > power) {
             throw new IndexOutOfBoundsException();
         }
+
+        int bitSetPos = element / BYTE_SIZE;
+        byte bitSetValue = bitSet[bitSetPos];
+
+        return ((bitSetValue >> (element - (bitSetPos * BYTE_SIZE))) & 1) == 1;
     }
 
     /**
@@ -62,48 +62,64 @@ public class Universe implements Iterable<Integer>{
      * @return boolean, true if added, false if not
      * @throws IndexOutOfBoundsException (elementExsists()) when number is greater than Universe power
      */
+
     public boolean setElement(int element) {
 
-        if (!elementExists(element)) {
-            int bitSetPos = element / BYTE_SIZE;
-            byte bitSetByte = bitSet[bitSetPos];
+            if (!elementExists(element)) {
+                int bitSetPos = element / BYTE_SIZE;
+                byte bitSetByte = bitSet[bitSetPos];
 
-            bitSetByte = (byte) (bitSetByte | (1 << element - bitSetPos*BYTE_SIZE));
-            bitSet[bitSetPos] = bitSetByte;
-            setSize++;
-            return true;
+                bitSetByte = (byte) (bitSetByte | (1 << element - bitSetPos * BYTE_SIZE));
+                bitSet[bitSetPos] = bitSetByte;
+                setSize++;
+                return true;
+            }
+            return false;
         }
-        return false;
-    }
+
 
     /**
      * Adds array of elements to set.
      * @param elements array of elements to add to set
-     * @return integer, number of addeds elements, -1 if array length is larger than Universe power
-     * @throws IndexOutOfBoundsException (elementExsists()) when number is greater than Universe power
+     * @return integer, number of addeds elements
+     * @throws IndexOutOfBoundsException if some of array elements are greater than Universe power
+     * @throws NullPointerException if argument passed is null
      */
 
     public int setElement(int[] elements) {
 
-        int counter = 0;
+        if (elements == null) {
+            throw new NullPointerException();
+        }
 
-        if (elements.length <= this.power()) {
-            for (int elementToSet : elements) {
-                if (elementToSet < this.power() && !this.elementExists(elementToSet)) {
-                    setElement(elementToSet);
+        int counter = 0;
+        int i = 0;
+
+        try {
+            for (i = 0; i < elements.length; i++) {
+                if (setElement(elements[i])) {
                     counter++;
                 }
+
             }
-            return counter;
+        } catch (IndexOutOfBoundsException e) {
+
+            for(int j = 0; j < i; j++) {
+                unsetElement(elements[j]);
+            }
+
+            throw new IndexOutOfBoundsException("Element " + elements[i] + " (index: " + i + ")" +
+                    " doesnt fit bounds of universe.");
         }
-        return -1;
+
+        return counter;
     }
 
     /**
      * Removes certain element from set.
      * @param element integer to remove from set
      * @return boolean, true if removed, false if not
-     * @throws IndexOutOfBoundsException (elementExsists()) when number is greater than Universe power
+     * @throws IndexOutOfBoundsException ( from elementExsists()) when number is greater than Universe power
      */
 
     public boolean unsetElement(int element) {
@@ -122,23 +138,38 @@ public class Universe implements Iterable<Integer>{
     /**
      * Removes array of elements from set.
      * @param elements array of elements to remove
-     * @return number of elements removed, -1 if array length is greater than Universe power
+     * @return number of elements removed
+     * @throws IndexOutOfBoundsException if some of array elements are greater than Universe power
+     * @throws NullPointerException if argument passed is null
      */
 
     public int unsetElement(int[] elements) {
 
+        if (elements == null) {
+            throw new NullPointerException();
+        }
+
         int counter = 0;
-        if (elements.length <= this.power()) {
-            for (int i = 0; i < elements.length; i++) {
-                int elementToUnset = elements[i];
-                if (elementToUnset < this.power() && this.elementExists(elementToUnset)) {
-                    unsetElement(elementToUnset);
+        int i = 0;
+
+        try {
+            for (i = 0; i < elements.length; i++) {
+                if (unsetElement(elements[i])) {
                     counter++;
                 }
+
             }
-            return counter;
+        } catch (IndexOutOfBoundsException e) {
+
+            for(int j = 0; j < i; j++) {
+                setElement(elements[j]);
+            }
+
+            throw new IndexOutOfBoundsException("Element " + elements[i] + " (index: " + i + ")" +
+                    " doesnt fit bounds of universe.");
         }
-        return -1;
+
+        return counter;
     }
 
     public void unsetAll() {
@@ -151,139 +182,150 @@ public class Universe implements Iterable<Integer>{
     /**
      * *Implements union set arithmetic
      * @param other accepts Universe object
-     * @return Returns union of to Universes
-     * @throws NullPointerException if parameter is null
+     * @return Returns new Universe object that represents union of two Universes
+     * @throws NullPointerException if parameter passed is null
      */
 
     public Universe union(Universe other) {
 
-        if (other != null) {
-
-            Universe newUniverse;
-            if (this.bitSet.length >= other.bitSet.length) {
-
-                newUniverse = new Universe(this.power());
-                for (int i = 0; i < this.bitSet.length; i++) {
-
-                    if (i <= other.bitSet.length) {
-                        newUniverse.bitSet[i] = (byte) (this.bitSet[i] | other.bitSet[i]);
-                    } else {
-                        newUniverse.bitSet[i] = this.bitSet[i];
-                    }
-                }
-            } else {
-
-                newUniverse = new Universe(other.power());
-                for (int i = 0; i < other.bitSet.length; i++) {
-
-                    if (i <= this.bitSet.length) {
-                        newUniverse.bitSet[i] = (byte) (this.bitSet[i] | other.bitSet[i]);
-                    } else {
-                        newUniverse.bitSet[i] = other.bitSet[i];
-                        }
-                    }
-                }
-                return newUniverse;
-
-            } else {
+        if (other == null) {
             throw new NullPointerException();
         }
+
+        Universe newUniverse;
+        if (this.bitSet.length >= other.bitSet.length) {
+
+            newUniverse = new Universe(this.power());
+            for (int i = 0; i < this.bitSet.length; i++) {
+
+                if (i <= other.bitSet.length) {
+                    newUniverse.bitSet[i] = (byte) (this.bitSet[i] | other.bitSet[i]);
+                } else {
+                    newUniverse.bitSet[i] = this.bitSet[i];
+                }
+            }
+        } else {
+
+            newUniverse = new Universe(other.power());
+            for (int i = 0; i < other.bitSet.length; i++) {
+
+                if (i <= this.bitSet.length) {
+                    newUniverse.bitSet[i] = (byte) (this.bitSet[i] | other.bitSet[i]);
+                } else {
+                    newUniverse.bitSet[i] = other.bitSet[i];
+                }
+            }
+        }
+        return newUniverse;
     }
 
     /**
      * *Implements union set arithmetic
+     * It changes object that calls it, if new object wanted user should use union() method
      * @param other accepts Universe object that has to have same power as one uniting with
      * @return void
+     * @throws NullPointerException if argument passed is null
+     * @throws IllegalArgumentException if other Universe object has different power
      */
 
-    public boolean unite(Universe other){
+    public void unite(Universe other){
 
-        if (other != null) {
-
-            if (this.power() == other.power()) {
-
-                for (int i = 0; i < this.bitSet.length; i++) {
-                    this.bitSet[i] = (byte) (this.bitSet[i] | other.bitSet[i]);
-                }
-                return true;
-            }
-            return false;
-
-        } else {
+        if (other == null) {
             throw new NullPointerException();
+        }
+        if (this.power() != other.power()) {
+            throw new IllegalArgumentException("Universe powers needs to be same. " +
+                    "This universe power: " + this.power() + " Other universe power: " + other.power());
+        }
+
+        for (int i = 0; i < this.bitSet.length; i++) {
+            this.bitSet[i] = (byte) (this.bitSet[i] | other.bitSet[i]);
         }
     }
 
     /**
      * *Implements intersection set arithmetic
-     * @param other accepts Universe object that has to have same power as one intersecting with
-     * @return Returns intersection of to Universes or null if their power differs
+     * @param other accepts Universe object
+     * @return Returns new Universe object that represents intersection of two Universes
      * @throws NullPointerException for null param
      */
 
     public Universe intersection(Universe other) {
 
-        if (other != null) {
-            Universe newUniverse;
-            if (this.bitSet.length >= other.bitSet.length) {
-                newUniverse = new Universe(other.power());
-                for (int i = 0; i < other.bitSet.length; i++) {
-                    newUniverse.bitSet[i] = (byte) (this.bitSet[i] & other.bitSet[i]);
-                }
-            } else {
-                newUniverse = new Universe(this.power());
-                for (int i = 0; i < this.bitSet.length; i++) {
-                    newUniverse.bitSet[i] = (byte) (this.bitSet[i] & other.bitSet[i]);
-                }
-            }
-            return newUniverse;
-        } else {
+        if (other == null) {
             throw new NullPointerException();
         }
+
+        Universe newUniverse;
+        if (this.bitSet.length >= other.bitSet.length) {
+            newUniverse = new Universe(other.power());
+            for (int i = 0; i < other.bitSet.length; i++) {
+                newUniverse.bitSet[i] = (byte) (this.bitSet[i] & other.bitSet[i]);
+            }
+        } else {
+            newUniverse = new Universe(this.power());
+            for (int i = 0; i < this.bitSet.length; i++) {
+                newUniverse.bitSet[i] = (byte) (this.bitSet[i] & other.bitSet[i]);
+            }
+        }
+        return newUniverse;
     }
+
+    /**
+     * *Implements intersection set arithmetic
+     * It changes object that calls it, if new object wanted user should use intersection() method
+     * @param other accepts Universe object that has to have same power as one uniting with
+     * @return void
+     * @throws NullPointerException if argument passed is null
+     * @throws IllegalArgumentException if other Universe object has different power
+     */
 
     public void intersect(Universe other) {
 
-        if (other != null) {
-            if (this.power() == other.power()) {
-                for (int i = 0; i < this.bitSet.length; i++) {
-                    this.bitSet[i] = (byte) (this.bitSet[i] & other.bitSet[i]);
-                }
-            }
-        } else {
+        if (other == null) {
             throw new NullPointerException();
         }
 
+        if (this.power() != other.power()) {
+            throw new IllegalArgumentException("Universe powers needs to be same. " +
+                     "This universe power: " + this.power() + " Other universe power: " + other.power());
+        }
+
+        for (int i = 0; i < this.bitSet.length; i++) {
+            this.bitSet[i] = (byte) (this.bitSet[i] & other.bitSet[i]);
+        }
     }
 
     /**
      * *Implements difference set arithmetic
-     * @param other accepts Universe object that has to have same power as one intersectingwith
-     * @return Returns intersection of to Universes or null if their power differs
+     * @param other accepts Universe object
+     * @return Returns intersection of to Universes
      * @throws NullPointerException when null passed
      */
 
     public Universe difference(Universe other) {
 
-        if (other != null) {
-
-            Universe newUniverse = new Universe(this.power());
-            if (this.power() >= other.power()) {
-
-                for (int i = 0; i < other.bitSet.length; i++) {
-                    newUniverse.bitSet[i] = (byte) (this.bitSet[i] ^ other.bitSet[i]);
-                }
-            } else {
-                for (int i = 0; i < this.bitSet.length; i++) {
-                    newUniverse.bitSet[i] = (byte) (this.bitSet[i] ^ other.bitSet[i]);
-                }
-            }
-            return newUniverse;
-        } else {
+        if (other == null) {
             throw new NullPointerException();
         }
+
+        Universe newUniverse = new Universe(this.power());
+        if (this.power() >= other.power()) {
+
+            for (int i = 0; i < other.bitSet.length; i++) {
+                newUniverse.bitSet[i] = (byte) (this.bitSet[i] & ~other.bitSet[i]);
+            }
+        } else {
+            for (int i = 0; i < this.bitSet.length; i++) {
+                newUniverse.bitSet[i] = (byte) (this.bitSet[i] & ~other.bitSet[i]);
+            }
+        }
+        return newUniverse;
     }
 
+    /**
+     * Changes object to complement of set in Universe
+     */
     public void complement() {
 
         for (int i = 0; i < this.bitSet.length; i++) {
@@ -342,6 +384,7 @@ public class Universe implements Iterable<Integer>{
      * There will be comma printed after last element in set.
      * @return string
      */
+
     @Override
     public String toString() {
 
@@ -364,6 +407,7 @@ public class Universe implements Iterable<Integer>{
      * Has functions hasNext() and next() to check if there is next element and one that returns it
      * @return Iterator
      */
+
     @Override
     public Iterator<Integer> iterator() {
         return new UniverseIterator();
@@ -399,4 +443,5 @@ public class Universe implements Iterable<Integer>{
             return current;
         }
     }
+
 }

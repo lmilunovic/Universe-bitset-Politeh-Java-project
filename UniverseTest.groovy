@@ -159,7 +159,7 @@ class UniverseTest extends GroovyTestCase {
     }
     void testIntersection() {
 
-        final int a = 40;
+        final int a = 50;
         final int b = 50;
 
         Universe univ1 = new Universe(a);
@@ -175,8 +175,9 @@ class UniverseTest extends GroovyTestCase {
 
         assertTrue intersection == univ1
         assertFalse intersection == univ2
-        univ1.intersect(univ2)
-        assertTrue intersection == univ1
+        univ2.intersect(univ1)
+        assertTrue intersection == univ2
+
     }
 
     void testDifference() {
